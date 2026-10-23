@@ -55,5 +55,9 @@ fetches its DESCRIPTION. The R version moves with `rocker/r-ver` in the
 
 ## Measured
 
-First build: see the run log of `Build image`; the job ceiling is twice the
-measured duration.
+First build (2026-10-23, run 40041681454): 7 min 19 s for the job, of
+which 6 min 42 s building the image; 265 R packages installed; smoke: R
+4.6.1, pandoc 3.12.1, qpdf 11.9.0. The job ceiling (90 min) is well above
+that and exists so a stalled download fails the build instead of holding
+the runner. The image is public: an anonymous pull of the manifest
+answers 200.

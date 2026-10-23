@@ -9,6 +9,9 @@ on:
     - cron: '0 6 * * 1'
   push:
     branches: [main]
+    paths-ignore:
+      - 'README.md'
+      - 'LICENSE'
   workflow_dispatch:
 
 permissions:
