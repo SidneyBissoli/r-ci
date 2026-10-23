@@ -1,0 +1,92 @@
+# Builds and publishes ghcr.io/sidneybissoli/r-ci: the CI image of the
+# portfolio's R packages (see Dockerfile). Weekly on Monday 06:00 UTC, so a
+# dependency added during the week is in the image before the Tuesday
+# mirror ETL of cvmdata; on every push to main; and on demand.
+name: Build image
+
+on:
+  schedule:
+    - cron: '0 6 * * 1'
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+concurrency:
+  group: build-image
+  cancel-in-progress: false
+
+env:
+  IMAGE: ghcr.io/sidneybissoli/r-ci
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    # measured on the first build: see the README; the ceiling is twice that
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Fetch the DESCRIPTION of each package
+        run: |
+          set -euo pipefail
+          grep -v '^#' packages.txt | while read -r repo branch; do
+            [ -z "$repo" ] && continue
+            pkg="${repo##*/}"
+            mkdir -p "descriptions/$pkg"
+            curl -fsSL "https://raw.githubusercontent.com/$repo/$branch/DESCRIPTION" \
+              -o "descriptions/$pkg/DESCRIPTION"
+            echo "$pkg: $(grep '^Version:' "descriptions/$pkg/DESCRIPTION")"
+          done
+
+      - name: Tags
+        id: tags
+        run: |
+          r=$(grep -oP '(?<=^FROM rocker/r-ver:)[0-9.]+' Dockerfile)
+          echo "r=$r" >> "$GITHUB_OUTPUT"
+          echo "dated=R${r}-$(date -u +%Y%m%d)" >> "$GITHUB_OUTPUT"
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          load: true
+          tags: r-ci:candidate
+          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache
+          cache-to: type=registry,ref=${{ env.IMAGE }}:buildcache,mode=max
+
+      - name: Smoke
+        run: |
+          set -euo pipefail
+          docker run --rm r-ci:candidate R --version | head -1
+          docker run --rm r-ci:candidate pandoc --version | head -1
+          docker run --rm r-ci:candidate qpdf --version | head -1
+          docker run --rm r-ci:candidate Rscript -e '
+            for (p in c("rcmdcheck", "lintr", "covr", "pkgdown", "testthat",
+                        "arrow", "duckdb", "httr2", "xml2", "cli")) {
+              suppressPackageStartupMessages(library(p, character.only = TRUE))
+            }
+            cat("ok:", length(.packages(all.available = TRUE)), "packages\n")
+          '
+
+      - name: Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: |
+            ${{ env.IMAGE }}:latest
+            ${{ env.IMAGE }}:R${{ steps.tags.outputs.r }}
+            ${{ env.IMAGE }}:${{ steps.tags.outputs.dated }}
+          cache-from: type=registry,ref=${{ env.IMAGE }}:buildcache

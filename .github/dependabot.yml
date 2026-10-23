@@ -1,0 +1,23 @@
+# Same convention as the other repositories of the portfolio: weekly on
+# Monday, hour drawn per repository, Actions grouped (major included).
+version: 2
+updates:
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:40"
+      timezone: America/Sao_Paulo
+    groups:
+      actions:
+        patterns: ["*"]
+        update-types: [major, minor, patch]
+  # the base image (rocker/r-ver) moves with each R release
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:40"
+      timezone: America/Sao_Paulo

@@ -1,0 +1,7 @@
+# repository and default branch of each R package whose dependencies go
+# into the image; the build fetches <repo>/<branch>/DESCRIPTION
+SidneyBissoli/cvmdata main
+SidneyBissoli/healthbR main
+SidneyBissoli/educabR main
+SidneyBissoli/senado main
+SidneyBissoli/welfarebR master
