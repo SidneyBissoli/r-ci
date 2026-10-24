@@ -75,7 +75,9 @@ jobs:
           docker run --rm r-ci:candidate R --version | head -1
           docker run --rm r-ci:candidate pandoc --version | head -1
           docker run --rm r-ci:candidate qpdf --version | head -1
-          docker run --rm r-ci:candidate rsync --version | head -1
+          # rsync prints its version in several writes; under pipefail the
+          # `head -1` of the runner would turn its SIGPIPE into a failure
+          docker run --rm r-ci:candidate sh -c 'rsync --version | head -1'
           docker run --rm r-ci:candidate Rscript -e '
             for (p in c("rcmdcheck", "lintr", "covr", "pkgdown", "testthat",
                         "arrow", "duckdb", "httr2", "xml2", "cli")) {
