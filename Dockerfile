@@ -27,7 +27,7 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # packages.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      ca-certificates curl git qpdf ghostscript locales libxml2-dev \
+      ca-certificates curl git gnupg qpdf ghostscript locales libxml2-dev \
       libcurl4-openssl-dev libssl-dev libgit2-dev \
  && sed -i 's/^# *\(pt_BR.UTF-8\)/\1/; s/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen \
  && locale-gen \
