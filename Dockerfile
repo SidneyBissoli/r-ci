@@ -22,7 +22,9 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 # Tools the checks call besides R: pandoc (vignettes, pkgdown), qpdf and
 # ghostscript (--compact-vignettes=gs+qpdf), git and curl (actions/checkout,
-# downloads), locales for the Portuguese strings of the packages.
+# downloads), gnupg (codecov-action verifies its uploader with gpg and
+# refuses to run without it), locales for the Portuguese strings of the
+# packages.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
       ca-certificates curl git qpdf ghostscript locales libxml2-dev \
