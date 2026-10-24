@@ -23,11 +23,13 @@ ENV DEBIAN_FRONTEND=noninteractive \
 # Tools the checks call besides R: pandoc (vignettes, pkgdown), qpdf and
 # ghostscript (--compact-vignettes=gs+qpdf), git and curl (actions/checkout,
 # downloads), gnupg (codecov-action verifies its uploader with gpg and
-# refuses to run without it), locales for the Portuguese strings of the
-# packages.
+# refuses to run without it), rsync (JamesIves/github-pages-deploy-action
+# copies the pkgdown site with it and fails without it; that step only runs
+# on push, so a green pull request does not prove it), locales for the
+# Portuguese strings of the packages.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends \
-      ca-certificates curl git gnupg qpdf ghostscript locales libxml2-dev \
+      ca-certificates curl git gnupg qpdf ghostscript rsync locales libxml2-dev \
       libcurl4-openssl-dev libssl-dev libgit2-dev \
  && sed -i 's/^# *\(pt_BR.UTF-8\)/\1/; s/^# *\(en_US.UTF-8\)/\1/' /etc/locale.gen \
  && locale-gen \
