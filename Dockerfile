@@ -7,7 +7,7 @@
 # packages through the Ubuntu apt mirror of the GitHub runners on every
 # job; on 2026-10-23 that mirror crawled and the two steps hung for hours.
 # Inside this image nothing is installed at job time.
-FROM rocker/r-ver:4.6.1
+FROM rocker/r-ver:4.6.2
 
 LABEL org.opencontainers.image.source="https://github.com/SidneyBissoli/r-ci" \
       org.opencontainers.image.description="R release + pandoc + the dependencies of the portfolio's R packages, for CI" \
